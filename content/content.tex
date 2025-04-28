@@ -268,7 +268,7 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 如图\ref{系统功能模块图}所示，本系统共分为用户管理、视频管理、社交互动、权限管理、搜索服务、消息通知、文件存储、系统监控共八大模块。
 \begin{figure}[hbt]
     \centering
-    \includegraphics[width=0.5\textwidth]{系统功能模块.png}
+    \includegraphics[width=1\textwidth]{系统功能模块.png}
     \caption{系统功能模块图}
     \label{系统功能模块图}
 \end{figure}
@@ -277,6 +277,172 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 
 \subsection{系统数据库设计}
 
+\subsubsection{数据库概念结构设计}
+
+开发者在充分掌握用户需求的基础上，边可以开始展开对数据库的概念结构设计，即将用户相对抽象的需求进行一定的具象化，使之成为能够指引后续设计过程的概念模型\cite{RN09}。本弹幕视频网站系统的数据库所使用的数据库类型是MySQL数据库，数据库实体关系图如\ref{实体关系图}。
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=1\textwidth]{实体关系.png}
+    \caption{实体关系图}
+    \label{实体关系图}
+\end{figure}
+
+根据实体关系图\ref{实体关系图}可以知道，数据库中的实体主要包括用户User、视频Video、弹幕Danmu、评论Comment、一级分类Category1、二级分类Category2以及标签Tag。对于本数据库中的用户、视频、弹幕、评论四个主要实体的具体描述属性如下：
+
+\begin{enumerate}[label=(\arabic*)]
+    \item 用户实体负责储存系统中的所有用户信息，包括用户id、用户名、昵称、头像、邮箱、手机号、密码、注册时间、简介。用户实体图如图\ref{用户实体图}所示。
+    \begin{figure}[hbt]
+        \centering
+        \includegraphics[width=0.5\textwidth]{用户实体.png}
+        \caption{用户实体图}
+        \label{用户实体图}
+    \end{figure}
+    \item 视频实体负责存储系统中的所有的视频信息，包括标题、视频id、简介、封面图片、观看量、发布时间、市场、发布用户id、一级分类id、二级分类id 。视频实体图如图\ref{视频实体图}所示。
+    \begin{figure}[hbt]
+        \centering
+        \includegraphics[width=0.5\textwidth]{视频实体.png}
+        \caption{视频实体图}
+        \label{视频实体图}
+    \end{figure}
+    \item 弹幕实体负责存储系统中的弹幕信息，包括弹幕内容、不透明度、颜色、字号、发送时间、弹幕id、所属视频id。弹幕实体图如图\ref{弹幕实体图}所示。
+    \begin{figure}[hbt]
+        \centering
+        \includegraphics[width=0.5\textwidth]{弹幕实体.png}
+        \caption{弹幕实体图}
+        \label{弹幕实体图}
+    \end{figure}
+    \item 评论实体负责储存系统中的评论信息，包括评论用户id、评论时间、被评论用户id、评论内容、评论id。评论实体图如图\ref{评论实体图}所示
+    \begin{figure}[hbt]
+        \centering
+        \includegraphics[width=0.5\textwidth]{评论实体.png}
+        \caption{评论实体图}
+        \label{评论实体图}
+    \end{figure}
+
+\end{enumerate}
+
+其中用户与视频、用户与评论、用户与弹幕、视频与评论、视频与弹幕、一级分类与二级分类均属于一对多的关系。视频与二级分类属于多对一的关系。视频与标签属于多对多的关系。
+
+\subsubsection{数据库逻辑结构设计}
+
+基本表是数据的存储过程建立的基础，因此在数据库设计时应首先建好表。根据弹幕视频网站后端系统的业务需求分析以及数据库设计原则，将基本实体图转换成MySQL支持的数据模型相符合的逻辑结构，采用合适的数据类型，完成系统数据表的设计。
+
+本数据库名称叫做imooc-bilibili，数据库中包括4张数据表：用户相关表、视频相关表、权限相关表以及其他功能表。每个表都包含主键id、创建时间creatTime、更新时间updatetime（部分表）和相关外键关联字段。
+
+以下列出主要的数据表：
+\begin{enumerate}[label=(\arabic*)]
+    \item 用户相关表
+    
+    用户相关表主要存储用户相关信息，如下表\ref{用户相关表}所示。
+    \begin{table}[htb]
+        \centering
+        \caption{用户相关表}
+        \label{用户相关表}
+        
+        \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{表名} & \textbf{说明} & \textbf{主要字段} \\
+        \hline
+        \makecell{t\_user} & \makecell{用户表} & \makecell{id, phone, email, password, salt, \\createTime,  updateTime} \\
+        \hline
+        \makecell{t\_user\_info} & \makecell{用户基本信息表} & \makecell{id, userId, nick, avatar, sign, gender, birth, \\createTime, updateTime} \\
+        \hline
+        \makecell{t\_user\_following} & \makecell{用户关注表} & \makecell{id, userId, followingId, groupId, \\createTime} \\
+        \hline
+        \makecell{t\_user\_moments} & \makecell{用户动态表} & \makecell{id, userId, type, contentId, \\createTime, updateTime} \\
+        \hline
+        \makecell{t\_user\_coin} & \makecell{用户硬币表} & \makecell{id, userId, amount, \\createTime, updateTime} \\
+        \hline
+        \makecell{t\_user\_role} & \makecell{用户角色关联表} & \makecell{id, userId, roleId, createTime} \\
+        \hline
+        \makecell{t\_refresh\_token} & \makecell{刷新令牌记录表} & \makecell{id, userId, refreshToken, \\createTime} \\
+        \hline
+    \end{tabular}
+    \end{table}
+
+    \item 视频相关表
+    
+    视频相关表主要存储视频相关信息，如下表\ref{视频相关表}所示。
+    \begin{table}[htb]
+        \centering
+        \caption{视频相关表}
+        \label{视频相关表}
+        \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{表名} & \textbf{说明} & \textbf{主要字段} \\
+        \hline
+        \makecell{t\_video} & \makecell{视频投稿记录表} & \makecell{id, userId, url, thumbnail, title, type, duration,\\ area, description, createTime, updateTime} \\
+        \hline
+        \makecell{t\_video\_comment} & \makecell{视频评论表 }& \makecell{id, videoId, userId, comment, replyUserId, \\rootId, createTime, updateTime} \\
+        \hline
+        \makecell{t\_video\_coin} & \makecell{视频硬币表} & \makecell{id, userId, videoId, amount, \\createTime, updateTime} \\
+        \hline
+        \makecell{t\_video\_collection} & \makecell{视频收藏记录表} & \makecell{id, videoId, \\userId, groupId, createTime} \\
+        \hline
+        \makecell{t\_video\_like }& \makecell{视频点赞记录表} & \makecell{id, userId, videoId, createTime} \\
+        \hline
+        \makecell{t\_video\_tag} & \makecell{视频标签关联表} & \makecell{id, videoId, tagId, createTime} \\
+        \hline
+        \makecell{t\_video\_view} & \makecell{视频观看记录表} & \makecell{id, videoId, userId, clientId, \\ip, createTime} \\
+        \hline
+        \makecell{t\_video\_binary\_picture} & \makecell{视频二值图记录表} & \makecell{id, videoId, frameNo, url, \\videoTimestamp, createTime} \\
+        \hline
+        \makecell{t\_video\_operation} & \makecell{视频操作表} & \makecell{id, userId, videoId, \\operationType, createTime} \\
+        \hline
+        \end{tabular}
+        \end{table}
+    
+    \item 权限相关表
+
+    权限相关表主要储存权限控制的相关信息，如下表\ref{权限相关表}所示。
+    \begin{table}[h]
+        \centering
+        \caption{权限相关表}
+        \label{权限相关表}
+        \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{表名} & \textbf{说明} & \textbf{主要字段} \\
+        \hline
+        \makecell{t\_auth\_role }& \makecell{权限控制-角色表} & \makecell{id, name, code, \\createTime, updateTime} \\
+        \hline
+        \makecell{t\_auth\_menu} & \makecell{权限控制-\\页面访问表} & \makecell{id, name, code, \\createTime, updateTime }\\
+        \hline
+        \makecell{t\_auth\_\\element\_operation} & \makecell{权限控制-\\页面元素操作表} & \makecell{id, elementName, elementCode, \\operationType, createTime, updateTime }\\
+        \hline
+        \makecell{t\_auth\_role\_menu} & \makecell{权限控制-\\角色页面菜单关联表} & \makecell{id, roleId, menuId, createTime }\\
+        \hline
+        \makecell{t\_auth\_role\_\\element\_operation} & \makecell{权限控制-\\角色与元素操作关联表 }& \makecell{id, roleId, elementOperationId, \\createTime}\\
+        \hline
+        \end{tabular}
+        \end{table}
+    
+    \item 其他功能表
+    
+    其他功能表主要存储剩余功能的相关信息，如下表\ref{其他功能表}所示。
+    \begin{table}[h]
+        \centering
+        \caption{其他功能表}
+        \label{其他功能表}
+        \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{表名} & \textbf{说明} & \textbf{主要字段} \\
+        \hline
+        \makecell{t\_danmu} & \makecell{弹幕记录表} & \makecell{id, userId, videoId, content, danmuTime, createTime} \\
+        \hline
+        \makecell{t\_file} & \makecell{文件表} & \makecell{id, url, type, md5, createTime} \\
+        \hline
+        \makecell{t\_following\_group} & \makecell{用户关注分组表} & \makecell{id, userId, name, type, createTime, updateTime} \\
+        \hline
+        \makecell{t\_collection\_group} & \makecell{收藏分组表} & \makecell{id, userId, name, type, createTime, updateTime} \\
+        \hline
+        \makecell{t\_tag} & \makecell{标签表} & \makecell{id, name, createTime} \\
+        \hline
+        \makecell{t\_content} & \makecell{动态内容表} & i\makecell{d, contentDetail, createTime} \\
+        \hline
+        \end{tabular}
+        \end{table}
+\end{enumerate}
 \newpage
 
 \section{系统实现}
