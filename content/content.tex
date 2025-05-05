@@ -499,7 +499,7 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 
 \begin{figure}[hbt]
     \centering
-    \includegraphics[width=1.0\textwidth]{POM依赖管理.png}
+    \includegraphics[width=1.0\textwidth]{项目依赖伪代码.png}
     \caption{POM依赖管理}
     \label{POM依赖管理}
 \end{figure}
@@ -508,17 +508,18 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 
 \subsubsection{用户模块}
 
-在系统的用户服务模块图\ref{用户模块伪代码}中，UserServiceImpl类承担着核心的业务逻辑处理工作，它实现了UserService接口，借助@Service注解被Spring容器识别为服务组件。
+在系统的用户服务模块中，UserServiceImpl类承担着核心的业务逻辑处理工作，它实现了UserService接口，借助@Service注解被Spring容器识别为服务组件。
+
+用户注册功能当用户发起注册请求时，系统会调用 register 方法。流程图如图\ref{用户注册流程图}，具体处理流程如下：
 
 \begin{figure}[hbt]
     \centering
-    \includegraphics[width=0.75\textwidth]{用户模块.png}
-    \caption{用户模块伪代码}
-    \label{用户模块伪代码}
+    \includegraphics[width=0.2\textwidth]{Register流程图.png}
+    \caption{用户注册流程图}
+    \label{用户注册流程图}
 \end{figure}
 
 
-用户注册功能当用户发起注册请求时，系统会调用 register 方法。具体处理流程如下：
 \begin{enumerate}[label=(\arabic*)]
     \item 参数校验：对用户提交的注册信息进行初步的合法性检查，确保数据的完整性和准确性。
     \item 用户存在性检查：通过UserDao访问数据库，依据用户提供的手机号码查询是否已有该用户存在。若存在，则抛出BusinessException异常，提示 “用户已存在”。
@@ -528,7 +529,16 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 
 \end{enumerate}
 
-用户登录功能当用户尝试登录系统时，系统会调用login方法。具体处理步骤如下：
+用户登录功能当用户尝试登录系统时，系统会调用login方法。流程图如图\ref{用户登录流程图}，具体处理步骤如下：
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=0.3\textwidth]{login流程图.png}
+    \caption{用户登录流程图}
+    \label{用户登录流程图}
+\end{figure}
+
+
 \begin{enumerate}[label=(\arabic*)]
     \item 参数校验：对用户提交的登录信息进行基本的格式和完整性检查。
     \item 用户信息获取：通过UserDao根据用户输入的手机号码从数据库中获取对应的用户信息。若未找到该用户，则抛出BusinessException异常，提示 “用户不存在”。
@@ -542,15 +552,17 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 
 \subsubsection{视频模块}
 
-如图\ref{视频模块伪代码}在视频模块的服务实现中，VideoServiceImpl类发挥着关键作用。该类通过@Service注解被 Spring 容器识别为服务组件，实现了VideoService接口，为视频的上传和播放功能提供了具体的业务逻辑处理。
+在视频模块的服务实现中，VideoServiceImpl类发挥着关键作用。该类通过@Service注解被 Spring 容器识别为服务组件，实现了VideoService接口，为视频的上传和播放功能提供了具体的业务逻辑处理。
+
+视频上传功能，当用户发起视频上传请求时，系统会调用uploadVideo方法，流程图如图\ref{视频上传流程图}具体的处理流程如下：
+
 \begin{figure}[hbt]
     \centering
-    \includegraphics[width=0.75\textwidth]{视频模块.png}
-    \caption{视频模块伪代码}
-    \label{视频模块伪代码}
+    \includegraphics[width=0.15\textwidth]{uploadVideo流程图.png}
+    \caption{视频上传流程图}
+    \label{视频上传流程图}
 \end{figure}
 
-视频上传功能，当用户发起视频上传请求时，系统会调用uploadVideo方法，具体的处理流程如下：
 \begin{enumerate}[label=(\arabic*)]
     \item 参数校验：对用户提交的视频上传信息进行初步的合法性检查，确保上传的文件和相关参数完整且准确。
     \item 借助FastDFSClient将用户上传的视频文件存储到分布式文件系统中，并获取视频文件的存储路径。
@@ -559,7 +571,17 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
     \item 视频索引创建：调用ElasticsearchService在Elasticsearch中为该视频创建索引，以便后续的搜索和查询操作。
 \end{enumerate}
 
-视频播放功能，当用户请求播放视频时，系统会调用 getVideoById 方法，具体处理步骤如下：
+\newpage
+
+视频播放功能，当用户请求播放视频时，系统会调用 getVideoById 方法，流程图如图\ref{视频播放流程图}，具体处理步骤如下：
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=0.2\textwidth]{getVideoById.png}
+    \caption{视频播放流程图}
+    \label{视频播放流程图}
+\end{figure}
+
 \begin{enumerate}[label=(\arabic*)]
     \item 视频信息获取：通过 VideoDao 根据视频 ID 从数据库中获取对应的视频信息。若未找到该视频，则抛出 BusinessException 异常，提示 “视频不存在”。
     \item 视频统计信息获取：使用 VideoDao 获取该视频的统计信息，如播放量、点赞数等。
@@ -570,22 +592,33 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 通过上述功能的实现，该视频服务模块为系统提供了完善的视频上传和播放服务，确保了视频数据的有效存储和展示。
 
 \subsubsection{弹幕模块}
-在弹幕服务模块中图\ref{弹幕模块伪代码}，DanmuServiceImpl类是核心实现，它通过@Service注解被 Spring 容器识别为服务组件，实现了DanmuService接口，为弹幕的发送和获取功能提供了具体业务逻辑。
+在弹幕服务模块中，DanmuServiceImpl类是核心实现，它通过@Service注解被 Spring 容器识别为服务组件，实现了DanmuService接口，为弹幕的发送和获取功能提供了具体业务逻辑。
+
+弹幕发送功能，当用户发送弹幕时，系统会调用sendDanmu方法，流程图\ref{弹幕发送流程图}如图，详细处理步骤如下：
+
 \begin{figure}[hbt]
     \centering
-    \includegraphics[width=0.75\textwidth]{弹幕模块.png}
-    \caption{弹幕模块伪代码}
-    \label{弹幕模块伪代码}
+    \includegraphics[width=0.15\textwidth]{sendDanmu流程图.png}
+    \caption{弹幕发送流程图}
+    \label{弹幕发送流程图}
 \end{figure}
 
-弹幕发送功能，当用户发送弹幕时，系统会调用sendDanmu方法，详细处理步骤如下：
 \begin{enumerate}[label=(\arabic*)]
     \item 参数校验：对用户发送的弹幕数据进行初步检查，确保数据的完整性和合法性，避免无效数据进入后续处理流程。
     \item 弹幕保存：创建一个Danmu对象，将用户ID、视频ID、弹幕内容以及弹幕发送时间等信息存入其中。接着，通过DanmuDao将该弹幕信息持久化到数据库，以便后续查询和分析。
     \item 实时推送：利用WebSocketServer将新发送的弹幕实时推送给正在观看该视频的其他用户，保证弹幕的即时性和交互性。
 \end{enumerate}
 
-弹幕列表获取功能，当需要获取某个视频的弹幕列表时，系统会调用getDanmuList方法，具体处理如下：
+弹幕列表获取功能，当需要获取某个视频的弹幕列表时，系统会调用getDanmuList方法，流程图\ref{弹幕列表获取流程图}如图，具体处理如下：
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=0.15\textwidth]{getDanmuList流程图.png}
+    \caption{弹幕列表获取流程图}
+    \label{弹幕列表获取流程图}
+\end{figure}
+
+
 \begin{enumerate}[label=(\arabic*)]
     \item 弹幕数据查询：通过 DanmuDao 根据视频 ID 从数据库中查询该视频对应的所有弹幕信息。
     \item 数据转换：将查询到的Danmu对象列表转换为DanmuDTO列表。通过Java 8的Stream API对每个Danmu对象进行映射转换，最终收集为一个新的DanmuDTO列表并返回，以满足前端展示需求。
@@ -594,15 +627,18 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
 通过上述功能实现，该弹幕服务模块为视频系统提供了高效的弹幕交互能力，保证了弹幕的存储、推送和展示功能的稳定运行。
 \subsubsection{搜索模块}
 
-如图\ref{搜索模块伪代码}在搜索服务模块中，SearchServiceImpl类起着关键作用，它通过 @Service注解被Spring容器识别为服务组件，实现了SearchService接口，为视频搜索和视频索引创建功能提供了具体的业务逻辑实现。
+在搜索服务模块中，SearchServiceImpl类起着关键作用，它通过 @Service注解被Spring容器识别为服务组件，实现了SearchService接口，为视频搜索和视频索引创建功能提供了具体的业务逻辑实现。
+
+视频搜索功能，当用户发起视频搜索请求时，系统会调用searchVideos方法，流程图\ref{视频搜索流程图}如图，具体处理流程如下：
+
 \begin{figure}[hbt]
     \centering
-    \includegraphics[width=0.75\textwidth]{搜索模块.png}
-    \caption{搜索模块伪代码}
-    \label{搜索模块伪代码}
+    \includegraphics[width=0.15\textwidth]{searchVideos流程图.png}
+    \caption{视频搜索流程图}
+    \label{视频搜索流程图}
 \end{figure}
 
-视频搜索功能，当用户发起视频搜索请求时，系统会调用searchVideos方法，具体处理流程如下：
+
 \begin{enumerate}[label=(\arabic*)]
     \item 搜索条件构建：根据用户传入的SearchDTO对象，调用buildSearchRequest方法构建符合 Elasticsearch要求的搜索请求对象，该对象包含了用户的搜索条件。
     \item 执行搜索操作：将构建好的搜索请求对象传递给ElasticsearchService的search方法，在Elasticsearch中执行搜索操作，并获取搜索响应结果。
@@ -610,7 +646,15 @@ Elasticsearch是一个基于Lurcene库构建的开源搜索引擎。提供了强
     \item 分页处理：将解析后的视频列表、用户请求的页码、每页数量以及搜索结果的总数量封装到PageResult对象中，实现搜索结果的分页展示，提高用户体验。
 \end{enumerate}
 
-视频索引创建功能，当需要为新视频创建索引时，系统会调用createVideoIndex方法，具体步骤如下：
+视频索引创建功能，当需要为新视频创建索引时，系统会调用createVideoIndex方法，流程图\ref{视频索引创建流程图}如图，具体步骤如下：
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=0.15\textwidth]{createVideoIndex流程图.png}
+    \caption{视频索引创建流程图}
+    \label{视频索引创建流程图}
+\end{figure}
+
 \begin{enumerate}[label=(\arabic*)]
     \item 索引文档构建：根据传入的 Video 对象，调用 buildIndexRequest 方法构建 Elasticsearch 的索引请求对象，该对象包含了视频的相关信息。
     \item 索引创建操作：将构建好的索引请求对象传递给ElasticsearchService的index方法，在Elasticsearch中为该视频创建索引，以便后续能够对该视频进行搜索。
